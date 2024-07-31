@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Hard Rock Solution - Song Lyric App</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <!-- Custom css -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav class="navbar  navbar-dark my-3">
+            <a class="navbar-brand" href="#">
+                <img src="images/logo.png" alt="Hard Rock Solution">
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavId"
+                aria-controls="collapsibleNavId" aria-expanded="false" aria-label="Toggle navigation">
+                <img src="images/toggler-icon.svg" alt="">
+            </button>
+            <div class="collapse navbar-collapse" id="collapsibleNavId">
+                <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">Dropdown</a>
+                        <div class="dropdown-menu" aria-labelledby="dropdownId">
+                            <a class="dropdown-item" href="#">Action 1</a>
+                            <a class="dropdown-item" href="#">Action 2</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="content-area">
+            <div class="search-bar col-md-6 mx-auto">
+                <h1 class="text-center">Hard Rock Lyric Search</h1>
+                <div class="search-box my-5">
+                    <form id="searchBtn">
+                        <input id = "inputSearch" type="text" name="song" class="search-song form-control" autofocus="autofocus" placeholder="Type the song you want the lyrics" id="search-input">
+                        <!-- <input type="text" class="form-control" placeholder="Enter your artist song name"> -->
+                        <button type="submit" class="btn btn-success search-btn">Search</button>
+                    </form>                    
+                </div>
+            </div>
+            <!-- Single Lyrics -->
+            <div id="trackList">                
+            </div>
+            <div id="singleLyrics" class="single-lyrics text-center">
+            </div>
+        </main>
+    </div>
+    <!-- Optional JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <script>
+        const goodQuotes1 = "She said 'I think so!'";
+        // goodQuotes1.split("'").join('');
+        console.log(goodQuotes1.split("'").join(''));
+        document.getElementById('searchBtn').addEventListener('submit', fetchLyrics);
+        const singleLyrics = (artist, title) =>{
+            title.split("'").join('');
+            fetch(`https://api.lyrics.ovh/v1/${artist}/${title}`)
+            .then(res => res.json())
+            .then(data =>{
+                document.getElementById('trackList').innerHTML = ""; 
+                console.log(data.lyrics);
+                document.getElementById('singleLyrics').innerText = data.lyrics;
+            })
+        }
+        function fetchLyrics(e){
+            const inputSearch = document.getElementById('inputSearch').value;
+            e.preventDefault();
+            fetch(`https://api.lyrics.ovh/suggest/${inputSearch}&limit=10`)
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                const allData = data.data;
+                console.log(allData);
+                const allTitles = allData.map(x => x.title);
+                const trackList = document.getElementById('trackList');
+                trackList.innerHTML = " ";
+                for (let i = 0; i < allTitles.length; i++) {                    
+                    trackList.innerHTML += `<div class="search-result col-md-8 mx-auto">
+                                                <div class="single-result row align-items-center my-3 p-3">
+                                                    <div class="col-md-3">
+                                                        <img src="https://cdn-images.dzcdn.net/images/artist/${allData[i].md5_image}/100x100-000000-80-0-0.jpg">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <h3 class="lyrics-name">${allTitles[i]}</h3>
+                                                        <p class="author lead">Album by <span>${allData[i].artist.name}</span></p>
+                                                    </div>
+                                                    <div class="col-md-3 text-md-right text-center">
+                                                        <button onclick = "singleLyrics(\x27${allData[i].artist.name}\x27, \x27${allTitles[i].split("'").join('')}\x27)" class="btn btn-success">Get Lyrics</button>
+                                                    </div>
+                                                </div>
+                                            </div>`;
+                }
+                                                                                                                                  
+            })
+        }
+        // fetchLyrics();
+    </script>
+    <!-- Custom Script Here -->
+</body>
+</html>
